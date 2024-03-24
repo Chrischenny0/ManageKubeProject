@@ -1,86 +1,77 @@
 'use client'
-import React from "react";
-import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, User, Chip, Tooltip, getKeyValue} from "@nextui-org/react";
-import {EditIcon} from "./EditIcon";
-import {DeleteIcon} from "./DeleteIcon";
-import {EyeIcon} from "./EyeIcon";
-import {columns, users} from "./data";
+import React, { useState } from "react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Spinner } from "@nextui-org/react";
+import { useAsyncList } from "@react-stately/data";
+import { customers } from "./data"; // Make sure this path is correct
 
-const statusColorMap = {
-  active: "success",
-  paused: "danger",
-  vacation: "warning",
-};
-
-export default function DataTable() {
-  const renderCell = React.useCallback((user, columnKey) => {
-    const cellValue = user[columnKey];
-
-    switch (columnKey) {
-      case "name":
-        return (
-          <User
-            avatarProps={{radius: "lg", src: user.avatar}}
-            description={user.email}
-            name={cellValue}
-          >
-            {user.email}
-          </User>
-        );
-      case "role":
-        return (
-          <div className="flex flex-col">
-            <p className="text-bold text-sm capitalize">{cellValue}</p>
-            <p className="text-bold text-sm capitalize text-default-400">{user.team}</p>
-          </div>
-        );
-      case "status":
-        return (
-          <Chip className="capitalize" color={statusColorMap[user.status]} size="sm" variant="flat">
-            {cellValue}
-          </Chip>
-        );
-      case "actions":
-        return (
-          <div className="relative flex items-center gap-2">
-            <Tooltip content="Details">
-              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                <EyeIcon />
-              </span>
-            </Tooltip>
-            <Tooltip content="Edit user">
-              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                <EditIcon />
-              </span>
-            </Tooltip>
-            <Tooltip color="danger" content="Delete user">
-              <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                <DeleteIcon />
-              </span>
-            </Tooltip>
-          </div>
-        );
-      default:
-        return cellValue;
+async function fetchDataWithRetry(url, options = {}, retries = 3, delay = 1000) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, options);
+            if (!response.ok) throw new Error('Response not ok');
+            return response.json();
+        } catch (error) {
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
     }
-  }, []);
+}
 
-  return (
-  <Table aria-label="Example table with custom cells">
-      <TableHeader columns={columns}>
-        {(column) => (
-          <TableColumn key={column.uid} align={column.uid === "actions" ? "center" : "start"}>
-            {column.name}
-          </TableColumn>
-        )}
-      </TableHeader>
-      <TableBody items={users}>
-        {(item) => (
-          <TableRow key={item.id}>
-            {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
-  );
+export default function App() {
+    const [isLoading, setIsLoading] = useState(true);
+
+    let list = useAsyncList({
+        async load({ signal }) {
+            try {
+                let json = await fetchDataWithRetry(`${process.env.API_URL}/canadian_customers`, { signal }, 3);
+                setIsLoading(false);
+                return {
+                    items: json.results && json.results.length > 0 ? json.results : customers.canadian_customers,
+                };
+            } catch (error) {
+                console.error("Failed to fetch data, using fallback:", error);
+                setIsLoading(false);
+                return { items: customers.canadian_customers };
+            }
+        },
+        async sort({ items, sortDescriptor }) {
+            return {
+                items: items.sort((a, b) => {
+                    let aValue = sortDescriptor.column === 'name' ? `${a.first_name} ${a.last_name}` : a[sortDescriptor.column];
+                    let bValue = sortDescriptor.column === 'name' ? `${b.first_name} ${b.last_name}` : b[sortDescriptor.column];
+                    let cmp = aValue.localeCompare(bValue, undefined, {numeric: true, sensitivity: 'base'});
+                    return sortDescriptor.direction === "descending" ? -cmp : cmp;
+                }),
+            };
+        },
+    });
+
+    return (
+        <Table
+            aria-label="Example table with client-side sorting, conditional empty state, and fallback data"
+            sortDescriptor={list.sortDescriptor}
+            onSortChange={list.sort}
+            classNames={{ table: "min-h-[400px]" }}
+        >
+            <TableHeader>
+                <TableColumn key="name" allowsSorting>Name</TableColumn> {/* Combined First and Last Name */}
+                <TableColumn key="email">Email</TableColumn>
+                <TableColumn key="city" allowsSorting>City</TableColumn>
+            </TableHeader>
+            <TableBody
+                items={list.items}
+                isLoading={isLoading}
+                loadingContent={<Spinner label="Loading..." />}
+                emptyContent={!isLoading && list.items.length === 0 ? "No rows to display." : null}
+            >
+                {(item) => (
+                    <TableRow key={item.customer_id}>
+                        <TableCell>{`${item.first_name} ${item.last_name}`}</TableCell>
+                        <TableCell>{item.email}</TableCell>
+                        <TableCell>{item.city}</TableCell>
+                    </TableRow>
+                )}
+            </TableBody>
+        </Table>
+    );
 }

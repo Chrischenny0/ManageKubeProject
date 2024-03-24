@@ -13,6 +13,7 @@
     "@nextui-org/system": "^2.0.15",
     "@nextui-org/table": "^2.0.28",
     "@nextui-org/theme": "^2.1.18",
+    "@react-stately/data": "^3.11.2",
     "framer-motion": "^11.0.20",
     "heroicons": "^2.1.1",
     "next": "14.1.3",
