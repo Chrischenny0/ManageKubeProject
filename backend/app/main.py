@@ -40,3 +40,11 @@ def read_canadian_customers(db: Session = Depends(get_db)):
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/test_db_connection")
+def test_db_connection(db: Session = Depends(get_db)):
+    try:
+        db.execute("SELECT 1")  # Execute a simple query to test the connection
+        return {"message": "Database connection successful"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
