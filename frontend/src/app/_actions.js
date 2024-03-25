@@ -15,6 +15,5 @@ async function fetchDataWithRetry(url, options = {}, retries = 3, delay = 1000) 
 }
 
 export async function getCanadianCustomers(signal) {
-    const API_URL = process.env.API_URL; // Ensure this environment variable is correctly set
-    return await fetchDataWithRetry(`${API_URL}/canadian_customers`, { signal }, 3);
+    return await fetchDataWithRetry(`${process.env.NEXT_PUBLIC_API_URL}/canadian_customers`, { signal }, 3);
 }

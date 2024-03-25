@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Spinner } from "@nextui-org/react";
 import { useAsyncList } from "@react-stately/data";
-import { getCanadianCustomers } from "./_actions"; // Import the function from _actions.js
+import { getCanadianCustomers } from "./_actions";
 
 export default function App() {
     const [isLoading, setIsLoading] = useState(true);
@@ -10,7 +10,7 @@ export default function App() {
     let list = useAsyncList({
         async load({ signal }) {
             try {
-                let json = await getCanadianCustomers(signal); // Use the imported function
+                let json = await getCanadianCustomers(signal);
                 setIsLoading(false);
                 // Ensure that items is only populated if json contains data; otherwise, return an empty array
                 return {
