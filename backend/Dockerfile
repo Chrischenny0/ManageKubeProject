@@ -1,9 +1,14 @@
-FROM mysql:latest
+FROM python
 
-ENV MYSQL_ROOT_PASSWORD=your_root_password_here
-ENV MYSQL_DATABASE=sakila
+COPY . ./src/
 
-EXPOSE 3306
+WORKDIR ./src/
 
-COPY ./sakila-db/sakila-schema.sql /docker-entrypoint-initdb.d/
-COPY ./sakila-db/sakila-data.sql /docker-entrypoint-initdb.d/
+RUN pip install -r requirements.txt
+
+WORKDIR ./app
+
+ENV DATABASE_PASSWORD=your_root_password_here
+ENV DATABASE_IP=localhost
+
+CMD ["uvicorn", "main:app", "--reload"]

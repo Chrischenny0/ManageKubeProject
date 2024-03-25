@@ -1,9 +1,10 @@
+import os
 from sqlalchemy import Column, Integer, String, ForeignKey, create_engine, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.dialects.mysql import ENUM
 
-DATABASE_URL = "mysql+pymysql://root:password@localhost/sakila"
+DATABASE_URL = "mysql+pymysql://root:" + os.environ['DATABASE_PASSWORD'] + "@" + os.environ["DATABASE_IP"] + "/sakila"
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

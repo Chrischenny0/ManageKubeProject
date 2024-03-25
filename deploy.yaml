@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: database-pod
+  labels:
+    app: minikube-intro
+spec:
+  hostname: database
+  containers:
+    - name: database
+      image: database
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: backend-pod
+  labels:
+    app: minikube-intro
+spec:
+  hostname: backend
+  containers:
+    - name: backend
+      image: backend
+      env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: your_root_password_here
+        - name: MYSQL_DATABASE
+          value: sakila
+        - name: DATABASE_IP
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: frontend-pod
+  labels:
+    app: minikube-intro
+    node: front-end
+spec:
+  hostname: frontend
+  containers:
+    - name: frontend
+      image: frontend
+      env:
+        - name: API_URL
+          value: http://backend:8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    node: front-end
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
