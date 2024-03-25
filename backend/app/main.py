@@ -1,28 +1,16 @@
-import time
-
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from models import SessionLocal, Customer, Address, City, Country
 
 app = FastAPI()
 
-def get_db(retry_limit=50, delay_seconds=5):
-    attempt_count = 0
-    while attempt_count < retry_limit:
-        try:
-            db = SessionLocal()
-            db.execute("SELECT 1")
-            yield db
-            break
-        except Exception as e:
-            attempt_count += 1
-            print(f"Database connection attempt {attempt_count} failed. Retrying in {delay_seconds} seconds...")
-            time.sleep(delay_seconds)
-            if attempt_count == retry_limit:
-                raise HTTPException(status_code=500, detail="Could not connect to the database.")
-        finally:
-            if 'db' in locals():
-                db.close()
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 # endpoint to get all canadian customers names and email, ordered by city name
 @app.get("/canadian_customers")

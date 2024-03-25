@@ -1,12 +1,29 @@
 import os
+import time
+
 from sqlalchemy import Column, Integer, String, ForeignKey, create_engine, Boolean
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.dialects.mysql import ENUM
 
-DATABASE_URL = "mysql+pymysql://root:" + os.environ['DATABASE_PASSWORD'] + "@" + os.environ["DATABASE_IP"] + "/sakila"
+def create_database_engine_with_retry(retry_limit=10, delay_seconds=5):
+    attempt_count = 0
+    while attempt_count < retry_limit:
+        try:
+            print(f"Attempting to connect to the database... Attempt {attempt_count + 1}")
+            DATABASE_URL = "mysql+pymysql://root:" + os.environ['DATABASE_PASSWORD'] + "@" + os.environ["DATABASE_IP"] + "/sakila"
+            engine = create_engine(DATABASE_URL)
+            engine.connect()
+            print("Successfully connected to the database.")
+            return engine
+        except OperationalError as e:
+            print(f"Connection attempt {attempt_count + 1} failed. Retrying in {delay_seconds} seconds...")
+            time.sleep(delay_seconds)
+            attempt_count += 1
+    raise OperationalError("Could not connect to the database after several retries.")
 
-engine = create_engine(DATABASE_URL)
+engine = create_database_engine_with_retry()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
