@@ -4,7 +4,7 @@
 
 #eval $(minikube docker-env)
 
-docker build ./database/ --tag "database"
+docker build ./database/ --tag ""
 
 docker build ./backend/ --tag "backend"
 

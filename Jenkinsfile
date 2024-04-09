@@ -3,18 +3,8 @@ pipeline {
 
     stages {
         stage('Build') {
-            steps {
-                sh './image_build.sh'
-            }
-        }
-        stage('Test') {
-            steps {
-                echo 'Testing..'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying....'
+            node {
+                def testImage = docker.build("database", "./database")
             }
         }
     }
