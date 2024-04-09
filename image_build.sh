@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-kubectl delete -f deploy.yaml
+#kubectl delete -f deploy.yaml
 
 #eval $(minikube docker-env)
 
