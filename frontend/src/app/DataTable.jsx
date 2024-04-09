@@ -1,3 +1,4 @@
+'use client'
 import React from "react";
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Spinner } from "@nextui-org/react";
 
