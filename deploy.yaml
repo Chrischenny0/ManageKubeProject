@@ -3,55 +3,74 @@ kind: Pod
 metadata:
   name: database-pod
   labels:
-    app: minikube-intro
+    app: database-pod
 spec:
-  hostname: database
   containers:
     - name: database
-      image: database
+      image: database:latest
+      imagePullPolicy: Never
 ---
 apiVersion: v1
 kind: Pod
 metadata:
   name: backend-pod
   labels:
-    app: minikube-intro
+    app: backend-pod
 spec:
-  hostname: backend
   containers:
     - name: backend
-      image: backend
+      image: backend:latest
+      imagePullPolicy: Never
       env:
         - name: MYSQL_ROOT_PASSWORD
           value: your_root_password_here
         - name: MYSQL_DATABASE
           value: sakila
         - name: DATABASE_IP
+          value: database-port
 ---
 apiVersion: v1
 kind: Pod
 metadata:
   name: frontend-pod
   labels:
-    app: minikube-intro
-    node: front-end
+    app: frontend-pod
 spec:
-  hostname: frontend
   containers:
     - name: frontend
-      image: frontend
-      env:
-        - name: API_URL
-          value: http://backend:8000
+      image: frontend:latest
+      imagePullPolicy: Never
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-service
+  name: load-balancer
 spec:
   selector:
-    node: front-end
+    app: frontend-pod
   ports:
-    - name: http
-      port: 80
-      targetPort: 80
+    - port: 80
+      targetPort: 3000
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-port
+spec:
+  selector:
+    app: backend-pod
+  ports:
+    - port: 8000
+      targetPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-port
+spec:
+  selector:
+    app: database-pod
+  ports:
+    - port: 3306
+      targetPort: 3306
