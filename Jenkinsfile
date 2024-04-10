@@ -1,25 +1,13 @@
-node {
-    def app
-
-    stage('Clone repository') {
-        /* Let's make sure we have the repository cloned to our workspace */
-
-        checkout scm
-    }
-
-    stage('Build image') {
-        /* This builds the actual image; synonymous to
-         * docker build on the command line */
-
-        app = docker.build("./backend")
-    }
-
-    stage('Test image') {
-        /* Ideally, we would run a test framework against our image.
-         * For this example, we're using a Volkswagen-type approach ;-) */
-
-        app.inside {
-            sh 'echo "Tests passed"'
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps{
+                sh 'docker system prune -af'
+                sh 'docker build -t database ./database/'
+                sh 'docker build -t backend ./backend/'
+                sh 'docker build -t frontend ./frontend/'
+            }
         }
     }
 }
