@@ -20,4 +20,4 @@ jobs:
         with:
           context: "{{defaultContext}}:backend"
           push: true
-          tags: backend:latest
+          tags: minikube-project/backend:latest
