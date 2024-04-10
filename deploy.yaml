@@ -7,8 +7,8 @@ metadata:
 spec:
   containers:
     - name: database
-      image: database:latest
-      imagePullPolicy: Never
+      image: chrischenny03/minikube-project:database
+      imagePullPolicy: Always
 ---
 apiVersion: v1
 kind: Pod
@@ -19,8 +19,8 @@ metadata:
 spec:
   containers:
     - name: backend
-      image: backend:latest
-      imagePullPolicy: Never
+      image: chrischenny03/minikube-project:backend
+      imagePullPolicy: Always
       env:
         - name: MYSQL_ROOT_PASSWORD
           value: your_root_password_here
@@ -38,8 +38,8 @@ metadata:
 spec:
   containers:
     - name: frontend
-      image: frontend:latest
-      imagePullPolicy: Never
+      image: chrischenny03/minikube-project:frontend
+      imagePullPolicy: Always
 ---
 apiVersion: v1
 kind: Service
