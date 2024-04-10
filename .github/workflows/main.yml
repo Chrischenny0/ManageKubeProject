@@ -20,4 +20,4 @@ jobs:
         with:
           context: "{{defaultContext}}:backend"
           push: true
-          tags: minikube-project/backend:latest
+          tags: chrischenny03/minikube-project:backend
