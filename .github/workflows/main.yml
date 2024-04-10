@@ -15,9 +15,24 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push database
+        uses: docker/build-push-action@v5
+        with:
+          context: "{{defaultContext}}:database"
+          push: true
+          tags: chrischenny03/minikube-project:database
+
+      - name: Build and push backend
         uses: docker/build-push-action@v5
         with:
           context: "{{defaultContext}}:backend"
           push: true
           tags: chrischenny03/minikube-project:backend
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: "{{defaultContext}}:frontend"
+          push: true
+          tags: chrischenny03/minikube-project:frontend
+
